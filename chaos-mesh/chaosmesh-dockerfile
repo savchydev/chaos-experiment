@@ -1,0 +1,15 @@
+# Use an Alpine base image
+FROM alpine:3.13
+
+# Install the necessary tools (Chaos Mesh and curl)
+RUN apk update && \
+    apk add curl && \
+    curl -sSL https://mirrors.chaos-mesh.org/latest/install.sh | sh && \
+    apk del curl && \
+    rm -rf /var/cache/apk/*
+
+# Copy the experiment YAML file to the container
+COPY experiment.yaml /experiment.yaml
+
+# Set the command to start the experiment
+ENTRYPOINT ["chaosctl", "start", "-f", "/experiment.yaml"]
