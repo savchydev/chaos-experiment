@@ -1,39 +1,63 @@
-version: '3'
+version: '3.7'
 
 services:
-  telegraf:
-    image: telegraf:1.17-alpine
-    volumes:
-      - ./telegraf.conf:/etc/telegraf/telegraf.conf:ro
-
   influxdb:
-    image: influxdb:1.8
+    image: influxdb:1.8.3
+    hostname: "monitoring_influxdb"
+    container_name: monitoring_influxdb
+    user: "root:root"
     volumes:
-      - influxdb:/var/lib/influxdb
+      - ./influxdb-data:/var/lib/influxdb
+    ports:
+      - 8086:8086
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=administrator
+      - DOCKER_INFLUXDB_INIT_PASSWORD=administrator
+      - DOCKER_INFLUXDB_INIT_ORG=org
+      - DOCKER_INFLUXDB_INIT_BUCKET=bucket
+      - DOCKER_INFLUXDB_INIT_ADMIN_TOKEN=token
+    # networks:
+    #   - monitornet
+
+  telegraf:
+    image: telegraf:1.16.3
+    hostname: "monitoring_telegraf"
+    container_name: monitoring_telegraf
+    volumes:
+      - ./telegraf:/etc/telegraf
+    depends_on:
+      - influxdb
+    # networks:
+    #   - monitornet
 
   chronograf:
-    image: chronograf:1.8
+    image: chronograf:1.8.8-alpine
+    hostname: "monitoring_chronograf"
+    container_name: monitoring_chronograf
     ports:
-      - "8888:8888"
-    depends_on:
-      - influxdb
+      - 8888:8888
 
   kapacitor:
-    image: kapacitor:1.5
-    volumes:
-      - ./kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
-    depends_on:
-      - influxdb
-  
-  grafana:
-    image: grafana/grafana:latest
+    image: kapacitor:1.5.9-alpine
+    hostname: "monitoring_kapacitor"
+    container_name: "monitoring_kapacitor"
     ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=password
+      - "9092:9092"
+    volumes:
+      - ./kapacitor/kapacitor.conf:/etc/kapacitor/kapacitor.conf:ro
     depends_on:
       - influxdb
 
-volumes:
-  influxdb:
+  # grafana:
+  #   image: grafana/grafana:latest
+  #   ports:
+  #     - 3000:3000
+  #   volumes:
+  #     - ./grafana-data:/usr/lib/grafana
+  #   environment:
+  #     - GF_INSTALL_PLUGINS=grafana-clock-panel,grafana-simple-json-datasource
+  #     - INFLUXDB_URL=http://influxdb:8086
+  #   networks:
+  #     - monitornet
+
