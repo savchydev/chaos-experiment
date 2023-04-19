@@ -1,0 +1,36 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: chaos-mesh
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: chaos-mesh
+  namespace: chaos-mesh
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: chaos-mesh
+  template:
+    metadata:
+      labels:
+        app: chaos-mesh
+    spec:
+      containers:
+        - name: chaos-mesh
+          image: pingcap/chaos-mesh:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: ENABLE_WEBHOOK
+              value: "false"
+          volumeMounts:
+            - name: chaos-mesh-data
+              mountPath: /var/run/chaos-mesh
+      volumes:
+        - name: chaos-mesh-data
+          emptyDir: {}
