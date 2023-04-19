@@ -14,6 +14,6 @@ spec:
     spec:
       containers:
       - name: basic-server
-        image: <your-image-name>
+        image: https://github.com/savchydev/chaos-exhttps://github.com/savchydev/chaos-experiment/tree/main/basic-serverperiment
         ports:
         - containerPort: 3000
