@@ -1,7 +1,0 @@
-replicas: 8
-image:
-  repository: your-repo/your-image-name
-  tag: v1
-resources:
-  cpu: 500m
-  memory: 512Mi
