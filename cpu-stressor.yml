@@ -1,0 +1,19 @@
+apiVersion: chaos-mesh.org/v1alpha1
+kind: ChaosExperiment
+metadata:
+  name: cpu-stressor
+spec:
+  action:
+    action: stress
+    stressors:
+      cpu:
+        container_name: basic-server
+        level: 3
+        cpu: 1
+  scope:
+    mode: one
+    value: basic-server
+
+# to apply kubectl apply -f cpu-stressor.yaml
+#This manifest defines an experiment named cpu-stressor that will stress the CPU of one of the web server
+#containers named basic-server at level 3 for 1 CPU. To apply this experiment.

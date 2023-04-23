@@ -1,19 +1,11 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: v1
+kind: Service
 metadata:
   name: basic-server
 spec:
-  replicas: 8
   selector:
-    matchLabels:
-      app: basic-server
-  template:
-    metadata:
-      labels:
-        app: basic-server
-    spec:
-      containers:
-      - name: basic-server
-        image: <your-image-name>
-        ports:
-        - containerPort: 3000
+    app: basic-server
+  ports:
+  - name: http
+    port: 80
+    targetPort: 3000
