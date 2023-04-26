@@ -1,8 +1,13 @@
-FROM alpine:latest
+FROM golang:1.16.4-alpine3.13 AS builder
 
-RUN apk add --no-cache curl && \
-    curl -L https://github.com/derailed/popeye/releases/download/v0.9.16/popeye_Linux_x86_64.tar.gz | tar xz && \
-    mv popeye /usr/local/bin/ && \
-    apk del curl
+WORKDIR /go/src/github.com/derailed/popeye
+COPY . .
 
-ENTRYPOINT ["popeye"]
+RUN go mod download
+RUN go build -ldflags="-s -w" -o /go/bin/popeye ./cmd/popeye
+
+FROM alpine:3.13
+
+COPY --from=builder /go/bin/popeye /usr/local/bin
+
+ENTRYPOINT ["/usr/local/bin/popeye"]

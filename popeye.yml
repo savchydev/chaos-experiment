@@ -1,17 +1,7 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: popeye
-
----
-
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: popeye
-  namespace: popeye
-  labels:
-    app: popeye
 spec:
   replicas: 1
   selector:
@@ -24,29 +14,13 @@ spec:
     spec:
       containers:
         - name: popeye
-          image: derailed/popeye:v0.9.5
-          args:
-            - "-c"
-            - "config.yaml"
+          image: your-registry/popeye:latest
+          command: ["popeye"]
+          args: ["-c", "/config/config.yaml"]
           volumeMounts:
             - name: popeye-config
-              mountPath: /etc/popeye
+              mountPath: /config
       volumes:
         - name: popeye-config
           configMap:
             name: popeye-config
-
----
-
-apiVersion: v1
-kind: Service
-metadata:
-  name: popeye
-  namespace: popeye
-spec:
-  selector:
-    app: popeye
-  ports:
-    - protocol: TCP
-      port: 8080
-      targetPort: 8080

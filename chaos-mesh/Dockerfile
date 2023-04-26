@@ -1,21 +1,19 @@
-FROM golang:1.17.2 AS build
+FROM golang:1.17-alpine3.14 AS builder
 
-WORKDIR /app
+RUN apk add --no-cache git
 
-COPY go.mod go.sum ./
+RUN git clone https://github.com/chaos-mesh/chaos-mesh.git && \
+    cd chaos-mesh && \
+    git checkout v1.1.1
 
-RUN go mod download
+WORKDIR /go/src/github.com/chaos-mesh/chaos-mesh
 
-COPY . .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -ldflags="-w -s" -o chaos-controller-manager cmd/chaos-controller-manager/main.go
 
-RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o chaos-mesh .
+FROM alpine:3.14
 
-FROM alpine:3.14.2
+RUN apk add --no-cache ca-certificates
 
-WORKDIR /app
+COPY --from=builder /go/src/github.com/chaos-mesh/chaos-mesh/chaos-controller-manager /chaos-controller-manager
 
-COPY --from=build /app/chaos-mesh .
-
-EXPOSE 2333
-
-CMD ["./chaos-mesh"]
+ENTRYPOINT ["/chaos-controller-manager"]

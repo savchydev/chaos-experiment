@@ -1,0 +1,4 @@
+clusterInfo:
+  name: my-cluster
+  skipNs:
+    - kube-system
