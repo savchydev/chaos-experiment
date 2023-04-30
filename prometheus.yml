@@ -43,3 +43,19 @@ data:
       - job_name: 'basic-server'
         static_configs:
           - targets: ['basic-server:80']
+
+        
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: basic-server-monitor
+  labels:
+    app: basic-server
+spec:
+  selector:
+    matchLabels:
+      app: basic-server
+  endpoints:
+  - port: web
+
